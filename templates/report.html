@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>All Reports</h2>
+
+{% if reports_data and reports_data|length > 0 %}
+    {% for report in reports_data %}
+        <h3>{{ report.heading }}</h3>
+        {% if report.data and report.data|length > 0 %}
+        <table>
+            <thead>
+                <tr>
+                    {% for key in report.data[0].keys() %}
+                    <th>{{ key }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in report.data %}
+                <tr>
+                    {% for value in row.values() %}
+                    <td>{{ value }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No data available for this report.</p>
+        {% endif %}
+        <hr>
+    {% endfor %}
+{% else %}
+<p>No reports available to display.</p>
+{% endif %}
+
+<a href="{{ url_for('admin.manage_users') }}">Back to Admin Dashboard</a>
+{% endblock %}

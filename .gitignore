@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual Environment
+venv/
+.env
+
+# PyCharm
+.idea/
+
+# Logs
+*.log
+
+# SQLite
+*.sqlite3
+
+# OS-specific files
+.DS_Store

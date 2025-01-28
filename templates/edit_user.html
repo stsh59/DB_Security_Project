@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Edit User</h2>
+<form method="post" action="{{ url_for('admin.edit_user', user_id=user.id) }}">
+    <label for="role">Role:</label>
+    <select name="role" required>
+        <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+        <option value="doctor" {% if user.role == 'doctor' %}selected{% endif %}>Doctor</option>
+        <option value="patient" {% if user.role == 'patient' %}selected{% endif %}>Patient</option>
+    </select>
+    <button type="submit">Update</button>
+</form>
+{% endblock %}
