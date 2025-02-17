@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Claims and Patients Access</h2>
+
+<!-- Display the claims section -->
+<h3>{{ claims_message }}</h3>
+{% if claims_data %}
+    <ul>
+        {% for claim in claims_data %}
+        <li>
+          <strong>Claim ID:</strong> {{ claim.id }} &nbsp;|&nbsp;
+          <strong>Patient ID:</strong> {{ claim.patient_id }} &nbsp;|&nbsp;
+          <strong>Claim Type:</strong> {{ claim.healthcare_claim_type }}
+        </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>{{ claims_message }}</p>
+{% endif %}
+
+<!-- Display the patients section -->
+<h3>{{ patients_message }}</h3>
+{% if patients_data %}
+    <ul>
+        {% for patient in patients_data %}
+        <li>
+          <strong>Patient ID:</strong> {{ patient.id }} &nbsp;|&nbsp;
+          <strong>Name:</strong> {{ patient.first_name }} {{ patient.last_name }}
+        </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>{{ patients_message }}</p>
+{% endif %}
+
+{% endblock %}

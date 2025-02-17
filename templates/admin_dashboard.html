@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Admin Dashboard</h2>
+<p>Welcome, {{ current_user.username }}</p> <!-- ✅ Display admin username -->
+
 <ul>
-    <li><a href="{{ url_for('admin.manage_users') }}">Manage Users</a></li>
-    <li><a href="{{ url_for('reports.reports', report_id=1) }}">View Reports</a></li>
+    <li><a href="{{ url_for('admin.manage_users') }}">Manage Users</a></li>  <!-- ✅ Link to Manage Users -->
+    <li><a href="{{ url_for('reports.reports') }}">View Reports</a></li>  <!-- ✅ Link to Reports -->
 </ul>
+
 {% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Billing Staff Dashboard</h2>
+<p>Welcome, {{ current_user.username }}</p>
+
+<!-- Links for testing access -->
+<ul>
+    <li><a href="{{ url_for('billing.access_claims_and_patients') }}">View Top 5 Claims and Patients</a></li>
+</ul>
+
+{% endblock %}

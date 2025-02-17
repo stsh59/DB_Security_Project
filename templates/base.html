@@ -3,19 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }}</title>
+    <title>{{ title if title else "Dashboard" }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- In base.html, replace the <script> block with -->
+    <script>
+        // Cookies are automatically sent with requests; no need for manual headers
+        async function fetchData(url) {
+            const response = await fetch(url, { credentials: 'include' }); // ✅ Include cookies
+            return response.json();
+        }
+    </script>
 </head>
 <body>
     <nav>
-        <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
         {% if current_user.is_authenticated %}
-            <a href="{{ url_for('auth.logout') }}">Logout</a>
+            <span>Welcome, {{ current_user.username }}</span>
+            <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                Logout
+            </a>
+            <form id="logout-form" action="{{ url_for('auth.logout') }}" method="post" style="display: none;">
+                {% if csrf_token %}
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"> <!-- ✅ Add only if CSRF is enabled -->
+                {% endif %}
+            </form>
         {% else %}
             <a href="{{ url_for('auth.login') }}">Login</a>
             <a href="{{ url_for('auth.signup') }}">Sign Up</a>
         {% endif %}
     </nav>
+
     <div class="container">
         {% with messages = get_flashed_messages(with_categories=True) %}
             {% if messages %}
@@ -26,6 +42,7 @@
                 </ul>
             {% endif %}
         {% endwith %}
+
         {% block content %}{% endblock %}
     </div>
 </body>

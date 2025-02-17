@@ -1,42 +1,62 @@
 from flask import Flask, render_template
 import secrets
 from urllib.parse import quote_plus
-from extensions import db, bcrypt, login_manager
-from routes import auth, admin, dashboard, reports
-from models import User  # Import User model
+from extensions import db, bcrypt, login_manager, jwt
+from flask_jwt_extended import JWTManager  # Import JWTManager
+from routes.auth import auth_bp
+from routes.admin import admin_bp
+from routes.dashboard import dashboard_bp
+from routes.reports import reports_bp  # ✅ Added Reports Blueprint
+from routes.billing import billing_bp
+from models import User, reflect_fhir_tables  # ✅ Import User model and FHIR reflection
+
 
 # Initialize Flask app
 app = Flask(__name__)
-app.secret_key = secrets.token_hex(16)  # Generate a secure secret key
+app.secret_key = secrets.token_hex(16)  # Secure random secret key
 
-# Encode the password to handle special characters
-password = quote_plus("9808311242Ab@")  # Encodes the '@' character
-app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://root:{password}@localhost/hospitaldb'
+# Encode the password to handle special characters in MySQL password
+password = quote_plus("9808311242Ab@")  # Encodes '@' in password
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://root:{password}@localhost/visualization'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JWT_SECRET_KEY'] = secrets.token_hex(32)  # JWT secret key
+
+# In app.py, after setting JWT_SECRET_KEY
+app.config['JWT_TOKEN_LOCATION'] = ['cookies']  # ✅ Look for JWT in cookies
+app.config['JWT_COOKIE_SECURE'] = True  # For HTTPS only
+app.config['JWT_COOKIE_CSRF_PROTECT'] = False  # ✅ Disable CSRF for simplicity (enable in production)
+app.config['JWT_SESSION_COOKIE'] = False  # Use standard cookie settings
 
 # Initialize extensions
 db.init_app(app)
 bcrypt.init_app(app)
 login_manager.init_app(app)
 
-# Define the user_loader function for Flask-Login
+# Initialize JWTManager properly
+jwt = JWTManager(app)
+
+# Ensure FHIR tables are reflected **inside the app context**
+with app.app_context():
+    reflect_fhir_tables()  # ✅ Load FHIR tables dynamically
+    db.create_all()  # ✅ Creates tables if not already present
+
+# Flask-Login user_loader function
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))  # Fetch user by ID from the database
 
 # Register Blueprints
-app.register_blueprint(auth.bp)
-app.register_blueprint(admin.bp)
-app.register_blueprint(dashboard.bp)
-app.register_blueprint(reports.bp)
+app.register_blueprint(auth_bp, url_prefix='/auth')       # Authentication routes
+app.register_blueprint(admin_bp, url_prefix='/admin')     # Admin management routes
+app.register_blueprint(dashboard_bp, url_prefix='/dashboard')  # Dashboard routes
+app.register_blueprint(reports_bp, url_prefix='/reports')  # Reports related routes
+app.register_blueprint(billing_bp, url_prefix='/billing')  # Billing related routes
 
-# Define a home route
+
+# Define home route
 @app.route('/')
 def home():
-    return render_template('base.html', title="Home")
+    return render_template('home.html', title="Home")
 
-# Run the app
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()  # Creates tables if not already present
     app.run(debug=True)
