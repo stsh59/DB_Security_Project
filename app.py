@@ -1,6 +1,5 @@
-from flask import Flask, render_template
-import secrets
-from urllib.parse import quote_plus
+from flask import Flask, render_template, g, redirect, url_for, request, jsonify
+from flask_login import login_required, current_user
 from extensions import db, bcrypt, login_manager, jwt
 from flask_jwt_extended import JWTManager  # Import JWTManager
 from routes.auth import auth_bp
@@ -8,15 +7,29 @@ from routes.admin import admin_bp
 from routes.dashboard import dashboard_bp
 from routes.reports import reports_bp  # ✅ Added Reports Blueprint
 from routes.billing import billing_bp
-from models import User, reflect_fhir_tables  # ✅ Import User model and FHIR reflection
+from routes.patients import patients_bp
+from models import User, Role, Patient, RolePermission, reflect_fhir_tables
+from utils import check_permission  # 导入 check_permission
+import secrets
+from urllib.parse import quote_plus
 
+from dotenv import load_dotenv
+import os
+
+# 加载 .env 文件
+load_dotenv()
+
+# 读取加密密钥
+ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY')
+# 打印密钥（用于调试）
+print(f"Encryption Key: {ENCRYPTION_KEY}")
 
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)  # Secure random secret key
 
 # Encode the password to handle special characters in MySQL password
-password = quote_plus("9808311242Ab@")  # Encodes '@' in password
+password = quote_plus("123456")  # Encodes '@' in password
 app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://root:{password}@localhost/visualization'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = secrets.token_hex(32)  # JWT secret key
@@ -51,7 +64,12 @@ app.register_blueprint(admin_bp, url_prefix='/admin')     # Admin management rou
 app.register_blueprint(dashboard_bp, url_prefix='/dashboard')  # Dashboard routes
 app.register_blueprint(reports_bp, url_prefix='/reports')  # Reports related routes
 app.register_blueprint(billing_bp, url_prefix='/billing')  # Billing related routes
+app.register_blueprint(patients_bp, url_prefix='/patients')
 
+# Define check_permission as a context processor
+@app.context_processor
+def utility_processor():
+    return dict(check_permission=check_permission)  # 使用 utils.py 中的 check_permission
 
 # Define home route
 @app.route('/')

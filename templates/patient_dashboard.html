@@ -2,4 +2,9 @@
 {% block content %}
 <h2>Patient Dashboard</h2>
 <p>Welcome, {{ current_user.username }}</p>
+    <ul>
+
+    <li><a href="{{ url_for('patients.list_patients') }}">View Patients</a></li>  <!-- ✅ Link to Show All Patients -->
+
+</ul>
 {% endblock %}

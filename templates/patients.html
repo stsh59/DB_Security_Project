@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Patient Management System for healthcare professionals and patients">
+    <title>Patient Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        :root {
+            --primary-color: #007BFF;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --light-bg: #f8f9fa;
+            --dark-bg: #343a40;
+            --text-color: #212529;
+            --spacing-unit: 1rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            margin: 0;
+        }
+
+        header {
+            background-color: var(--dark-bg);
+            color: white;
+            padding: var(--spacing-unit);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-auth {
+            display: flex;
+            gap: 1rem;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 var(--spacing-unit);
+        }
+
+        h1, h2 {
+            margin-bottom: 1rem;
+            color: var(--dark-bg);
+        }
+
+        .flash {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .section {
+            margin-bottom: 2rem;
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        form {
+            display: grid;
+            gap: 1rem;
+            max-width: 400px;
+        }
+
+        label {
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        input {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            padding: 0.5rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        li a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        li a:hover {
+            color: #0056b3;
+        }
+
+        .patient-details {
+            display: grid;
+            gap: 0.5rem;
+            max-width: 600px;
+        }
+
+        .patient-details p {
+            margin: 0.25rem 0;
+        }
+
+        .restricted {
+            color: var(--secondary-color);
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-auth {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            main {
+                margin: 1rem;
+                padding: 0.5rem;
+            }
+
+            form {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('dashboard.index') }}">Dashboard</a>
+            {% if current_user.is_authenticated %}
+                <div class="nav-auth">
+                    <span>Welcome, {{ current_user.username }} | </span>
+                    <a href="{{ url_for('auth.logout') }}">Logout</a>
+                </div>
+            {% else %}
+                <div class="nav-auth">
+                    <a href="{{ url_for('auth.login') }}">Login</a>
+                </div>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main>
+        <h1>Patient Management System</h1>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="flash">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Create New Patient Form -->
+        {% if current_user.is_authenticated and check_permission(current_user, 'patients', 'write') %}
+            <section class="section">
+                <h2>Create New Patient</h2>
+                <form method="POST" action="{{ url_for('patients.create_patient') }}">
+                    <label for="Id">Patient ID:</label>
+                    <input type="text" id="Id" name="Id" required placeholder="Enter Patient ID">
+
+                    <label for="BIRTHDATE">Birthdate:</label>
+                    <input type="date" id="BIRTHDATE" name="BIRTHDATE" required>
+
+
+
+                    <label for="SSN">Social Security Number (SSN):</label>
+                    <input type="text" id="SSN" name="SSN" placeholder="XXX-XX-XXXX">
+
+                    <label for="DRIVERS">Driver's License:</label>
+                    <input type="text" id="DRIVERS" name="DRIVERS" placeholder="e.g., DL123456">
+
+
+
+                    <label for="FIRST">First Name:</label>
+                    <input type="text" id="FIRST" name="FIRST">
+
+                    <label for="LAST">Last Name:</label>
+                    <input type="text" id="LAST" name="LAST">
+
+
+                    <label for="ADDRESS">Address:</label>
+                    <input type="text" id="ADDRESS" name="ADDRESS" placeholder="123 Main St, City, State">
+
+
+                    <button type="submit">Create Patient</button>
+                </form>
+            </section>
+        {% else %}
+            <p class="restricted">You do not have permission to create patients.</p>
+        {% endif %}
+
+        <!-- Patient Directory -->
+
+    {% if current_user.is_authenticated and check_permission(current_user, 'patients', 'read') %}
+        <section class="section">
+          <h2>Patient Directory</h2>
+           <ul class="patient-list">
+             {% if patients|length > 0 %}
+                {% for patient in patients %}
+                    <li class="patient-item">
+                        <strong>ID:</strong> {{ patient.Id }}<br>
+                        <strong>Birthdate:</strong> {{ patient.BIRTHDATE if patient.BIRTHDATE else 'Not provided' }}<br>
+                        <strong>First Name:</strong> {{ patient.FIRST if patient.FIRST else 'Not provided' }}<br>
+                        <strong>Last Name:</strong> {{ patient.LAST if patient.LAST else 'Not provided' }}<br>
+                        <strong>SSN:</strong> {{ patient.SSN if patient.SSN else 'Not provided' }}<br>
+                        <strong>Driver's License:</strong> {{ patient.DRIVERS if patient.DRIVERS else 'Not provided' }}<br>
+                        <strong>Address:</strong> {{ patient.ADDRESS if patient.ADDRESS else 'Not provided' }}<br>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li>No patients found.</li>
+            {% endif %}
+        </ul>
+    </section>
+{% else %}
+    <p class="restricted">You do not have permission to view patients.</p>
+{% endif %}
+    </main>
+
+    <footer>
+        <p>© 2025 Patient Management System. All rights reserved.</p>
+    </footer>
+</body>
+</html>
