@@ -28,7 +28,7 @@ app.secret_key = secrets.token_hex(16)  # Secure random secret key
 
 # Encode the password to handle special characters in MySQL password
 password = quote_plus("9808311242Ab@")  # Encodes '@' in password
-app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://root:{password}@localhost/visualization'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://root:{password}@localhost/visualization2'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = secrets.token_hex(32)  # JWT secret key
 
