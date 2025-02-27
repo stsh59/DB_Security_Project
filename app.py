@@ -36,9 +36,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = secrets.token_hex(32)  # JWT secret key
 
 # In app.py, after setting JWT_SECRET_KEY
-app.config['JWT_TOKEN_LOCATION'] = ['cookies']  # ✅ Look for JWT in cookies
+app.config['JWT_TOKEN_LOCATION'] = ['cookies']  # Look for JWT in cookies
 app.config['JWT_COOKIE_SECURE'] = True  # For HTTPS only
-app.config['JWT_COOKIE_CSRF_PROTECT'] = False  # ✅ Disable CSRF for simplicity (enable in production)
+app.config['JWT_COOKIE_CSRF_PROTECT'] = False  # Disable CSRF for simplicity (enable in production)
 app.config['JWT_SESSION_COOKIE'] = False  # Use standard cookie settings
 
 # Initialize extensions
@@ -51,8 +51,8 @@ jwt = JWTManager(app)
 
 # Ensure FHIR tables are reflected **inside the app context**
 with app.app_context():
-    reflect_fhir_tables()  # ✅ Load FHIR tables dynamically
-    db.create_all()  # ✅ Creates tables if not already present
+    reflect_fhir_tables()  # Load FHIR tables dynamically
+    db.create_all()  # Creates tables if not already present
 
 # Flask-Login user_loader function
 @login_manager.user_loader
