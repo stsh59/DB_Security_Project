@@ -25,6 +25,7 @@ ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY')
 print(f"Encryption Key: {ENCRYPTION_KEY}")
 
 # Initialize Flask app
+
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)  # Secure random secret key
 
