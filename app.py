@@ -5,23 +5,20 @@ from flask_jwt_extended import JWTManager  # Import JWTManager
 from routes.auth import auth_bp
 from routes.admin import admin_bp
 from routes.dashboard import dashboard_bp
-from routes.reports import reports_bp  # ✅ Added Reports Blueprint
+from routes.reports import reports_bp  # Added Reports Blueprint
 from routes.billing import billing_bp
 from routes.patients import patients_bp
 from models import User, Role, Patient, RolePermission, reflect_fhir_tables
-from utils import check_permission  # 导入 check_permission
+from utils import check_permission  # check_permission
 import secrets
 from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
 import os
 
-# 加载 .env 文件
 load_dotenv()
 
-# 读取加密密钥
 ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY')
-# 打印密钥（用于调试）
 print(f"Encryption Key: {ENCRYPTION_KEY}")
 
 # Initialize Flask app
@@ -30,7 +27,7 @@ app = Flask(__name__)
 app.secret_key = secrets.token_hex(16)  # Secure random secret key
 
 # Encode the password to handle special characters in MySQL password
-password = quote_plus("123456")  # Encodes '@' in password
+password = quote_plus("9808311242Ab@")  # Encodes '@' in password
 app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://root:{password}@localhost/visualization'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = secrets.token_hex(32)  # JWT secret key
