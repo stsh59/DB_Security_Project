@@ -6,19 +6,19 @@
     {% for report in reports_data %}
         <h3>{{ report.heading }}</h3>
         {% if report.data and report.data|length > 0 %}
-        <table>
+        <table border="1" cellpadding="6" cellspacing="0">
             <thead>
                 <tr>
-                    {% for key in report.data[0].keys() %}
-                    <th>{{ key }}</th>
+                    {% for col in report.data[0].__table__.columns %}
+                    <th>{{ col.name }}</th>
                     {% endfor %}
                 </tr>
             </thead>
             <tbody>
                 {% for row in report.data %}
                 <tr>
-                    {% for value in row.values() %}
-                    <td>{{ value }}</td>
+                    {% for col in row.__table__.columns %}
+                    <td>{{ row[col.name] if row[col.name] is defined else '' }}</td>
                     {% endfor %}
                 </tr>
                 {% endfor %}

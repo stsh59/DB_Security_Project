@@ -1,3 +1,5 @@
+<!-- manage_users.html -->
+
 {% extends "base.html" %}
 {% block content %}
 <h2>Manage Users</h2>
@@ -17,7 +19,7 @@
         <tr>
             <td>{{ user.id }}</td>
             <td>{{ user.username }}</td>
-            <td>{{ user.role }}</td>
+            <td>{{ user.role.role_name }}</td>
             <td>
                 <a href="{{ url_for('admin.edit_user', user_id=user.id) }}">Edit</a> |
                 <form method="post" action="{{ url_for('admin.delete_user', user_id=user.id) }}" style="display:inline;">

@@ -2,20 +2,42 @@
 __pycache__/
 *.py[cod]
 *.pyo
+*.pyd
+*.pdb
+*.pyc
+*.so
 
 # Virtual Environment
 .venv/
-
+venv/
+env/
+ENV/
 
 # PyCharm
 .idea/
+
+# VSCode
+.vscode/
 
 # Logs
 *.log
 
 # SQLite
-
 *.sqlite3
+
+# Jupyter
+.ipynb_checkpoints/
 
 # OS-specific files
 .DS_Store
+
+# Test, Coverage, Mypy, Build
+.cache/
+.pytest_cache/
+htmlcov/
+.coverage
+.mypy_cache/
+.dmypy.json
+build/
+dist/
+*.egg-info/

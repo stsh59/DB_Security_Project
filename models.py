@@ -1,3 +1,5 @@
+# models.py
+
 from extensions import db  # 从 extensions.py 导入 db
 from flask_login import UserMixin
 from sqlalchemy import inspect, Column, Integer,LargeBinary
@@ -112,6 +114,21 @@ class Patient(db.Model):
 
     def __repr__(self):
         return f"<Patient(Id='{self.Id}', BIRTHDATE='{self.BIRTHDATE}')>"
+
+class AuditLog(db.Model):
+    __tablename__ = 'audit_logs'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(db.String(150), nullable=False)
+    role = db.Column(db.String(50), nullable=False)
+    action = db.Column(db.String(100), nullable=False)
+    table_name = db.Column(db.String(100), nullable=False)
+    record_id = db.Column(db.String(50), nullable=True)
+    timestamp = db.Column(db.DateTime, server_default=db.func.now())
+    ip_address = db.Column(db.String(50), nullable=True)
+
+    def __repr__(self):
+        return f"<AuditLog {self.username} - {self.action} on {self.table_name}>"
+
 
 # 辅助函数（可选，用于初始化数据库）
 def init_db(app):

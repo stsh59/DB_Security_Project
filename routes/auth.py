@@ -1,12 +1,15 @@
+# auth.py
+
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_user, logout_user, login_required
-from flask_jwt_extended import create_access_token, set_access_cookies
+from flask_jwt_extended import create_access_token, set_access_cookies, create_refresh_token, set_refresh_cookies, \
+    get_jwt_identity, jwt_required
 from extensions import db, bcrypt
 from models import User, Role  # ✅ Import Role
 from flask import jsonify
 
-
 auth_bp = Blueprint('auth', __name__)
+
 
 @auth_bp.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -40,7 +43,6 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if user and bcrypt.check_password_hash(user.password, password):
-            # First check if role is valid BEFORE creating token
             if not user.role:
                 flash('Role not assigned. Contact admin.', 'danger')
                 return redirect(url_for('auth.login'))
@@ -57,21 +59,21 @@ def login():
                 flash('Invalid role detected. Contact admin.', 'danger')
                 return redirect(url_for('auth.login'))
 
-            # Now handle successful login
             login_user(user)
             access_token = create_access_token(identity=str(user.id))
+            refresh_token = create_refresh_token(identity=str(user.id))  # ✅ Add refresh token
 
-            # Create response AFTER all checks
             response = redirect(url_for(dashboard_routes[role_name]))
             set_access_cookies(response, access_token)
-            response.headers['Cache-Control'] = 'no-cache, no-store'  # ✅ Prevent caching issues
+            set_refresh_cookies(response, refresh_token)  # ✅ Set refresh cookie
+            response.headers['Cache-Control'] = 'no-cache, no-store'
             return response
 
-        else:  # This else belongs to the password check
+        else:
             flash('Invalid username or password', 'danger')
             return redirect(url_for('auth.login'))
 
-    return render_template('login.html')  # GET request handling
+    return render_template('login.html')
 
 
 @auth_bp.route('/logout', methods=['POST'])  # ✅ Change GET to POST
@@ -81,3 +83,13 @@ def logout():
     flash('Logged out successfully', 'success')
     return redirect(url_for('auth.login'))
 
+
+# ✅ Add this new route at the bottom of auth.py
+@auth_bp.route('/refresh', methods=['POST'])
+@jwt_required(refresh=True)
+def refresh():
+    identity = get_jwt_identity()
+    new_access_token = create_access_token(identity=identity)
+    response = jsonify({'msg': 'Token refreshed'})
+    set_access_cookies(response, new_access_token)
+    return response

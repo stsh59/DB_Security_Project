@@ -1,9 +1,12 @@
+# app.py
+
 from flask import Flask, render_template, g, redirect, url_for, request, jsonify
 from flask_login import login_required, current_user
 from extensions import db, bcrypt, login_manager, jwt
 from flask_jwt_extended import JWTManager  # Import JWTManager
 from routes.auth import auth_bp
 from routes.admin import admin_bp
+from routes.doctor import doctor_bp
 from routes.dashboard import dashboard_bp
 from routes.reports import reports_bp  # Added Reports Blueprint
 from routes.billing import billing_bp
@@ -12,6 +15,7 @@ from models import User, Role, Patient, RolePermission, reflect_fhir_tables
 from utils import check_permission  # check_permission
 import secrets
 from urllib.parse import quote_plus
+from datetime import timedelta
 
 from dotenv import load_dotenv
 import os
@@ -28,11 +32,13 @@ app.secret_key = secrets.token_hex(16)  # Secure random secret key
 
 # Encode the password to handle special characters in MySQL password
 password = quote_plus("9808311242Ab@")  # Encodes '@' in password
-app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://root:{password}@localhost/visualization2'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://root:{password}@localhost/visualization4'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = secrets.token_hex(32)  # JWT secret key
 
 # In app.py, after setting JWT_SECRET_KEY
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=15)
+app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']  # Look for JWT in cookies
 app.config['JWT_COOKIE_SECURE'] = True  # For HTTPS only
 app.config['JWT_COOKIE_CSRF_PROTECT'] = False  # Disable CSRF for simplicity (enable in production)
@@ -51,28 +57,35 @@ with app.app_context():
     reflect_fhir_tables()  # Load FHIR tables dynamically
     db.create_all()  # Creates tables if not already present
 
+
 # Flask-Login user_loader function
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))  # Fetch user by ID from the database
 
+
 # Register Blueprints
-app.register_blueprint(auth_bp, url_prefix='/auth')       # Authentication routes
-app.register_blueprint(admin_bp, url_prefix='/admin')     # Admin management routes
+app.register_blueprint(auth_bp, url_prefix='/auth')  # Authentication routes
+app.register_blueprint(admin_bp, url_prefix='/admin')  # Admin management routes
 app.register_blueprint(dashboard_bp, url_prefix='/dashboard')  # Dashboard routes
 app.register_blueprint(reports_bp, url_prefix='/reports')  # Reports related routes
 app.register_blueprint(billing_bp, url_prefix='/billing')  # Billing related routes
 app.register_blueprint(patients_bp, url_prefix='/patients')
+app.register_blueprint(doctor_bp, url_prefix='/doctor')  # Doctor related routes
+
+
 
 # Define check_permission as a context processor
 @app.context_processor
 def utility_processor():
     return dict(check_permission=check_permission)  # 使用 utils.py 中的 check_permission
 
+
 # Define home route
 @app.route('/')
 def home():
     return render_template('home.html', title="Home")
+
 
 if __name__ == '__main__':
     app.run(debug=True)
